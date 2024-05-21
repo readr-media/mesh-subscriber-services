@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 import src.request_body as request_body
-from src.handler import userlog_handler, notify_handler
+from src.handler import userlog_handler, notify_handler, action_handler
 
 ### App related variables
 app = FastAPI()
@@ -41,5 +41,5 @@ async def notify(request: request_body.SubRequest):
 
 @app.post('action-sub')
 async def action(request: request_body.SubRequest):
-  
-  return "ok"
+  response: JSONResponse = action_handler(request)
+  return response
