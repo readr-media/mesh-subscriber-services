@@ -6,4 +6,5 @@ pydantic==2.6.3
 aiohttp==3.8.1
 gql==3.0.0
 google-cloud-logging==2.7.0
+pytz==2023.3.post1
 requests_toolbelt
