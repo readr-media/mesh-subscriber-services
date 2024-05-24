@@ -72,9 +72,7 @@ def userlog_handler(request: SubRequest) -> JSONResponse:
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"error": "no data in message received"},
         )
-    print('userlog original content: ', message["data"])
     content = base64.b64decode(message["data"]).decode("utf-8")
-    print('userlog content: ', content)
     content = ast.literal_eval(content)
 
     now = datetime.now(pytz.timezone(config.TIME_ZONE)).strftime("%Y.%m.%d %H:%M:%S")
@@ -93,10 +91,10 @@ def userlog_handler(request: SubRequest) -> JSONResponse:
         )
 
     objId = (
-    content.get('targetId', '') or \
-    content.get('commentId', '') or \
-    content.get('storyId', '') or \
-    content.get('collectionId', '')
+        content.get('targetId', '') or \
+        content.get('commentId', '') or \
+        content.get('storyId', '') or \
+        content.get('collectionId', '')
     )
     objective = content.get('objective', '')
     uuid = content.get('UUID', '')

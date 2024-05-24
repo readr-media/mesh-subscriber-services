@@ -34,12 +34,12 @@ async def userlog(request: request_body.SubRequest):
   response: JSONResponse = userlog_handler(request)
   return response
 
-@app.post('notify-sub')
+@app.post('/notify-sub')
 async def notify(request: request_body.SubRequest):
   response: JSONResponse = notify_handler(request)
   return response
 
-@app.post('action-sub')
+@app.post('/action-sub')
 async def action(request: request_body.SubRequest):
   response: JSONResponse = action_handler(request)
   return response
