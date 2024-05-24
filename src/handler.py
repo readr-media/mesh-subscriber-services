@@ -73,6 +73,7 @@ def userlog_handler(request: SubRequest) -> JSONResponse:
             content={"error": "no data in message received"},
         )
     content = base64.b64decode(message["data"]).decode("utf-8")
+    print('userlog content: ', content)
     content = ast.literal_eval(content)
 
     now = datetime.now(pytz.timezone(config.TIME_ZONE)).strftime("%Y.%m.%d %H:%M:%S")
