@@ -21,7 +21,7 @@ def action_handler(request: SubRequest) -> JSONResponse:
             content={"error": "no data in message received"},
         )
     content = base64.b64decode(message["data"]).decode("utf-8")
-    content = ast.literal_eval(content)
+    content = (ast.literal_eval(content))['json_payload']
     print("action_handler content: ", content)
     if action.execute(content)==False:
         return JSONResponse(
@@ -43,7 +43,7 @@ def notify_handler(request: SubRequest) -> JSONResponse:
             content={"error": "no data in message received"},
         )
     content = base64.b64decode(message["data"]).decode("utf-8")
-    content = ast.literal_eval(content)
+    content = ast.literal_eval(content)['json_payload']
     
     print("notify_handler content: ", content)
     action = content.get('action', None)
@@ -78,7 +78,7 @@ def userlog_handler(request: SubRequest) -> JSONResponse:
             content={"error": "no data in message received"},
         )
     content = base64.b64decode(message["data"]).decode("utf-8")
-    content = ast.literal_eval(content)
+    content = ast.literal_eval(content)['json_payload']
 
     now = datetime.now(pytz.timezone(config.TIME_ZONE)).strftime("%Y.%m.%d %H:%M:%S")
     action = content.get('action', None)
