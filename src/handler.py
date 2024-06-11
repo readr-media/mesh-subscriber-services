@@ -14,6 +14,7 @@ import src.config as config
 
 def action_handler(request: SubRequest) -> JSONResponse:
     message = request.message
+    print(message)
     if "data" not in message:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
