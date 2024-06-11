@@ -14,7 +14,7 @@ import src.config as config
 
 def action_handler(request: SubRequest) -> JSONResponse:
     message = request.message
-    print(message)
+    print("action_handler: ", message)
     if "data" not in message:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -35,6 +35,7 @@ def action_handler(request: SubRequest) -> JSONResponse:
     
 def notify_handler(request: SubRequest) -> JSONResponse:
     message = request.message
+    print("notify_handler: ", message)
     if "data" not in message:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -68,6 +69,7 @@ def notify_handler(request: SubRequest) -> JSONResponse:
 
 def userlog_handler(request: SubRequest) -> JSONResponse:
     message = request.message
+    print("userlog_handler: ", message)
     if "data" not in message:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
