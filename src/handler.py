@@ -22,6 +22,7 @@ def action_handler(request: SubRequest) -> JSONResponse:
         )
     content = base64.b64decode(message["data"]).decode("utf-8")
     content = ast.literal_eval(content)
+    print("action_handler content: ", content)
     if action.execute(content)==False:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -43,7 +44,8 @@ def notify_handler(request: SubRequest) -> JSONResponse:
         )
     content = base64.b64decode(message["data"]).decode("utf-8")
     content = ast.literal_eval(content)
-
+    
+    print("notify_handler content: ", content)
     action = content.get('action', None)
     if not action:
         return JSONResponse(
