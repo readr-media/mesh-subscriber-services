@@ -276,7 +276,7 @@ def execute(content):
             return False
         members = remove_same_member_sender(members, senderId)
         if members:
-            return create_notify(members, senderId, type_str, obj, object_id)
+            return create_notify(gql_client, members, senderId, type_str, obj, object_id)
         else:
             print("No members.")
             return True
