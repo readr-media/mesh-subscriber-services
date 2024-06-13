@@ -24,8 +24,8 @@ def action_handler(request: SubRequest) -> JSONResponse:
     print("action_handler content: ", content)
     if action.execute(content)==False:
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={"error": "action handler error when action.execute()"},
+            status_code=status.HTTP_200_OK,
+            content={"message": "action doesn't belong to this handler"},
         )
     
     return JSONResponse(
@@ -59,7 +59,7 @@ def notify_handler(request: SubRequest) -> JSONResponse:
     if result==False:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content={"error": "notify handler error when notify.execute()"},
+            content={"message": "notify failed when notify execute()"},
         )
     
     return JSONResponse(
@@ -131,6 +131,7 @@ def userlog_handler(request: SubRequest) -> JSONResponse:
     logging_client = logging.Client()
     logger = logging_client.logger(logger_name)
     logger.log_struct(info = clientInfo, severity = "INFO", resource = resource, log_name = logger_name)
+    print("Log clientInfo successed: ", clientInfo)
     return JSONResponse(
         status_code = status.HTTP_200_OK,
         content = {"message": "success"}
