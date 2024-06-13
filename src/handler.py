@@ -47,18 +47,18 @@ def notify_handler(request: SubRequest) -> JSONResponse:
     action = content.get('action', None)
     if not action:
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={"error": "parameter error: action missing"},
+            status_code=status.HTTP_200_OK,
+            content={"message": "ignore message because of missing action"},
         )
-    if ('add' and 'remove') not in action:
+    if ('add' not in action) and ('remove' not in action):
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={"error": "data content with error"},
+            status_code=status.HTTP_200_OK,
+            content={"message": "ignore message because that action is not add or remove"},
         )
     result = notify.execute(content)
     if result==False:
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_200_OK,
             content={"error": "notify handler error when notify.execute()"},
         )
     
