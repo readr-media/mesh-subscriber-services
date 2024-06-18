@@ -144,7 +144,7 @@ def query_members(gql_client, senderId, type_str, obj, object_id):
 
     elif type_str == 'comment':
         # delete same notify before create
-        notifiesId = query_delete_notifyIds(senderId, type_str, obj, object_id)
+        notifiesId = query_delete_notifyIds(gql_client, senderId, type_str, obj, object_id)
         if notifiesId:
             for notifyId in notifiesId:
                 if delete_notify(notifyId):
