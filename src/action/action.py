@@ -7,6 +7,7 @@ from src.action.comment import comment_handler
 from src.action.pick import pick_handler
 from src.action.bookmark import bookmark_handler
 from src.action.like import like_handler
+from src.action.category import category_handler
 
 def execute(content):
     if 'action' in content and content['action']:
@@ -25,6 +26,8 @@ def execute(content):
             return bookmark_handler(content, gql_client)
         if 'like' in action:
             return like_handler(content, gql_client)
+        if 'category' in action:
+            return category_handler(content, gql_client)
         if 'read' or 'collection' in action:
             return True
     return False
