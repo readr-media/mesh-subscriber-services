@@ -56,7 +56,7 @@ def category_handler(content, gql_client):
                 following_category{
                     id
                 }
-                following_category_count
+                following_collectionCount
             }
         }
     '''
