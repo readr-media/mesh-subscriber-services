@@ -6,6 +6,7 @@ from gql.transport.requests import RequestsHTTPTransport
 
 from src.notify.query_collection import collection_follower, collection_creator_follower
 from src.notify.query import creator, picker, commenter
+import src.config as config
 
 def remove_same_member_sender(members, senderId):
     members = set(members)
@@ -234,7 +235,7 @@ def execute(content):
     action = content.get('action', False)
     act, *type_str = tuple(content['action'].split('_')) if action else False
     type_str = "".join(type_str)
-    senderId = content.get('memberId', -1)
+    senderId = content.get('memberId', config.CUSTOME_MEMBER)
     if senderId=='customId' or int(senderId) < 0:
         print("memberId is visitor")
         return True

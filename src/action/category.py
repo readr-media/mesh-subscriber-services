@@ -1,4 +1,5 @@
 from gql import gql
+import src.config as config
 
 def filter_categories(action, memberId, categoryIds, gql_client):
     query = '''
@@ -26,8 +27,8 @@ def filter_categories(action, memberId, categoryIds, gql_client):
     return filtered_categories
 
 def category_handler(content, gql_client):
-    memberId = content.get('memberId', False)
-    if int(memberId) < 0:
+    memberId = content.get('memberId', config.CUSTOME_MEMBER)
+    if memberId == 'customId' or int(memberId)<0:
         print("member is visitor")
         return True
     

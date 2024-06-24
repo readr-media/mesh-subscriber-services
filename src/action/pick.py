@@ -1,5 +1,6 @@
 import datetime
 from gql import gql
+import src.config as config
 
 def check_pick_exists(memberId, obj, targetId, gql_client):
     query = '''
@@ -59,8 +60,8 @@ def update_pick_mutation(update_data, gql_client):
     return False
 
 def add_pick_mutatioin(content, gql_client):
-    memberId = content['memberId'] if 'memberId' in content and content['memberId'] else False
-    if int(memberId) < 0:
+    memberId = content.get('memberId', config.CUSTOME_MEMBER)
+    if memberId == 'customId' or int(memberId)<0:
         print("member is visitor")
         return True
     targetId = content['targetId'] if 'targetId' in content and content['targetId'] else False
@@ -85,8 +86,8 @@ def add_pick_mutatioin(content, gql_client):
         return False
 
 def add_pick_and_comment_mutation(content, gql_client):
-    memberId = content['memberId'] if 'memberId' in content and content['memberId'] else False
-    if int(memberId) < 0:
+    memberId = content.get('memberId', config.CUSTOME_MEMBER)
+    if memberId == 'customId' or int(memberId)<0:
         print("member is visitor")
         return True
     targetId = content['targetId'] if 'targetId' in content and content['targetId'] else False
@@ -115,8 +116,8 @@ def add_pick_and_comment_mutation(content, gql_client):
     return create_pick_mutation(memberId, obj, targetId, state, published_date, pick_comment, gql_client)
 
 def rm_pick_mutation(content, gql_client):
-    memberId = content['memberId'] if 'memberId' in content and content['memberId'] else False
-    if int(memberId) < 0:
+    memberId = content.get('memberId', config.CUSTOME_MEMBER)
+    if memberId == 'customId' or int(memberId)<0:
         print("member is visitor")
         return True
     targetId = content['targetId'] if 'targetId' in content and content['targetId'] else False
@@ -155,7 +156,6 @@ def rm_pick_mutation(content, gql_client):
         return update_pick_mutation(update_data_pick, gql_client)
 
 def pick_handler(content, gql_client):
-
     if content['action'] == 'add_pick':
         return add_pick_mutatioin(content, gql_client)
     elif content['action'] == 'add_pick_and_comment':

@@ -1,1 +1,2 @@
 TIME_ZONE = "Asia/Taipei"
+CUSTOME_MEMBER = -1
