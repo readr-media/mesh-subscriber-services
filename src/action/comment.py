@@ -3,14 +3,16 @@ from gql import gql
 
 
 def add_comment_mutation(content, gql_client):
-    memberId = content['memberId'] if 'memberId' in content and content['memberId'] else False
-    if int(memberId) < 0:
-        print("member is visitor")
+    memberId = content.get('memberId', -1)
+    if memberId=='customId' or int(memberId) < 0:
+        print("member is not valid to add comment")
         return True
-    targetId = content['targetId'] if 'targetId' in content and content['targetId'] else False
-    state = content['state'] if 'state' in content and content['state'] else False
-    comment_content = content['content'].replace("\n", "\\n") if 'content' in content and content['content'] else False
-    obj = content['objective'] if 'objective' in content and content['objective'] else False
+    
+    targetId = content.get('targetId', False)
+    state = content.get('state', False)
+    comment_content = content.get('content', False)
+    comment_content = str(comment_content).replace("\n", "\\n") if comment_content else False
+    obj = content.get('objective', False)
     published_date = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 
     if not(memberId and targetId and state and comment_content and obj):
@@ -18,7 +20,6 @@ def add_comment_mutation(content, gql_client):
         return False
 
     obj = 'root' if obj == 'comment' else obj
-
     mutation = '''
             mutation{
                 createComment(data:{
@@ -37,6 +38,7 @@ def add_comment_mutation(content, gql_client):
     if isinstance(result, dict) and 'createComment' in result:
         return True
     return False
+
 def rm_comment_mutation(content, gql_client):
     commentId = content['commentId'] if 'commentId' in content and content['commentId'] else False
     if not commentId:
