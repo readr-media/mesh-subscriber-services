@@ -99,17 +99,18 @@ def create_notify(gql_client, members, senderId, type_str, obj, objectiveId):
             return True
     return False
 
-def delete_notify(gql_client,notifyId):
-    delete_mutation = '''
-    mutation{
-        deleteNotify(where:{id:"%s"}){
-            id
-        }
-    }''' % notifyId
-    result = gql_client.execute(gql(delete_mutation))
-    if isinstance(result, dict) and 'deleteNotify' in result:
-        if isinstance(result['deleteNotify'], dict) and result['deleteNotify']:
-            return True
+def delete_notify(gql_client, notifyId: int=None):
+    if notifyId:
+        delete_mutation = '''
+        mutation{
+            deleteNotify(where:{id:"%s"}){
+                id
+            }
+        }''' % notifyId
+        result = gql_client.execute(gql(delete_mutation))
+        if isinstance(result, dict) and 'deleteNotify' in result:
+            if isinstance(result['deleteNotify'], dict) and result['deleteNotify']:
+                return True
     return False
 
 def update_notifies(gql_client, notifyIds, actiondate):
@@ -145,12 +146,11 @@ def query_members(gql_client, senderId, type_str, obj, object_id):
     elif type_str == 'comment':
         # delete same notify before create
         notifiesId = query_delete_notifyIds(gql_client, senderId, type_str, obj, object_id)
-        if notifiesId:
-            for notifyId in notifiesId:
-                if delete_notify(notifyId):
-                    continue
-                else:
-                    return False
+        if len(notifiesId)==0:
+            return False
+        for notifyId in notifiesId:
+            if delete_notify(gql_client, notifyId):
+                continue
         if obj == 'story':
             story_pickers = picker(gql_client, 'story', object_id)
             story_comment_members = commenter(gql_client, 'story', object_id)
@@ -210,6 +210,7 @@ def query_members(gql_client, senderId, type_str, obj, object_id):
     else:
         print("action type not exists.")
         return False
+
 def query_delete_notifyIds(gql_client, senderId, type_str, obj, object_id):
     query_notifiesId = '''
     query{
@@ -229,8 +230,9 @@ def execute(content):
     gql_endpoint = os.environ['GQL_ENDPOINT']
     gql_transport = RequestsHTTPTransport(url=gql_endpoint)
     gql_client = Client(transport=gql_transport, fetch_schema_from_transport=True)
-    
-    act, *type_str = tuple(content['action'].split('_')) if 'action' in content and content['action'] else False
+
+    action = content.get('action', False)
+    act, *type_str = tuple(content['action'].split('_')) if action else False
     type_str = "".join(type_str)
     senderId = content.get('memberId', -1)
     if int(senderId) < 0:
@@ -248,7 +250,7 @@ def execute(content):
         return False
     
     # remove_comment has different data
-    if content['action'] == 'remove_comment':
+    if action == 'remove_comment':
         rm_comment_data = query_rm_comment_data(gql_client, object_id, senderId)
         if rm_comment_data:
             obj = rm_comment_data['obj']
