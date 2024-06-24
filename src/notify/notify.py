@@ -235,7 +235,7 @@ def execute(content):
     act, *type_str = tuple(content['action'].split('_')) if action else False
     type_str = "".join(type_str)
     senderId = content.get('memberId', -1)
-    if int(senderId) < 0:
+    if senderId=='customId' or int(senderId) < 0:
         print("memberId is visitor")
         return True
     
