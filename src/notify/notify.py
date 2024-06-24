@@ -223,7 +223,7 @@ def query_delete_notifyIds(gql_client, senderId, type_str, obj, object_id):
             if result['notifies']:
                 return [notifies['id']for notifies in result['notifies']]
             return []
-    return False
+    return []
 
 def execute(content):
     gql_endpoint = os.environ['GQL_ENDPOINT']
@@ -282,9 +282,9 @@ def execute(content):
             return True
     if act == 'remove':
         notifyIds = query_delete_notifyIds(gql_client, senderId, type_str, obj, object_id)
-        if notifyIds is False:
+        if len(notifyIds)==0:
             return False
-        if notifyIds:
+        else:
             # check is there any comment from same sender in same 
             if type_str == 'comment'and 'published_date' in rm_comment_data:
                 return update_notifies(gql_client, notifyIds, rm_comment_data['published_date'])
