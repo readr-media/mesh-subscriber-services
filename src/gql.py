@@ -35,3 +35,21 @@ query Stories{{
   }}
 }}
 """
+
+### 查詢某篇文章的內容
+gql_single_story = '''
+query Story{{
+    story(where: {{id: {ID} }}){{
+        id
+        url
+        source{
+          id
+        }
+        og_title
+        og_image
+        og_description
+        full_screen_ad
+        isMember
+    }}
+}}
+'''
