@@ -42,9 +42,9 @@ query Story{{
     story(where: {{id: {ID} }}){{
         id
         url
-        source{
+        source{{
           id
-        }
+        }}
         og_title
         og_image
         og_description
