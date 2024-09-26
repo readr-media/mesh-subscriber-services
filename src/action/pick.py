@@ -124,7 +124,18 @@ def add_pick_and_comment_mutation(content, gql_client):
                 }
             }''' % (memberId, state, published_date, pick_content, comment_obj, targetId)
 
-    return create_pick_mutation(memberId, obj, targetId, state, published_date, pick_comment, gql_client)
+    result = create_pick_mutation(memberId, obj, targetId, state, published_date, pick_comment, gql_client)
+    if result==True:
+        # synchronize mongodb, we only synchronize read
+        try:
+            mongo_url = os.environ.get('MONGO_URL', None)
+            env = os.environ.get('ENV', 'dev')
+            if obj=='story' and state=='public' and targetId:
+                db = connect_db(mongo_url, env)
+                add_read(db, memberId, targetId)
+        except Exception as e:
+            print(f"mongo add_read failed: {str(e)}")
+    return result
 
 def rm_pick_mutation(content, gql_client):
     memberId = content.get('memberId', config.CUSTOME_MEMBER)
