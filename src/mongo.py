@@ -23,7 +23,7 @@ def create_story(db, gql_endpoint, story_id):
         return None
     
     # get data from postgres
-    story = gql_query(gql_endpoint, gql_single_story.format(ID=story_id))
+    story, _ = gql_query(gql_endpoint, gql_single_story.format(ID=story_id))
     story = story['story']
     mongo_story_info = {
         '_id': story['id'],
