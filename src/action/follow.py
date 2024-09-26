@@ -1,4 +1,6 @@
 from gql import gql
+from src.mongo import connect_db, add_follow, remove_follow
+import os
 
 def follow_handler(content, gql_client):
 
@@ -30,6 +32,16 @@ def follow_handler(content, gql_client):
     else:
         print("action not exitsts")
         return False
+
+    # update mongo
+    mongo_url = os.environ.get('MONGO_URL', None)
+    env = os.environ.get('ENV', 'dev')
+    if mongo_url and obj=='member':
+        db = connect_db(mongo_url, env)
+        if content['action']=='add_follow':
+            add_follow(db, memberId, targetId)
+        if content['action']=='remove_follow':
+            remove_follow(db, memberId, targetId)  
 
     mutation = '''
     mutation{

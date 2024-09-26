@@ -286,7 +286,7 @@ def add_follow(db, member_id: str, followed_member_id: str):
             print(f'mongo_add_follow: member {followed_member_id} add follower {member_id}')
     return True
 
-def mongo_remove_follow(db, member_id:str, followed_member_id: str):    
+def remove_follow(db, member_id:str, followed_member_id: str):    
     # check input
     check_input = (member_id and followed_member_id)
     if check_input==None:
