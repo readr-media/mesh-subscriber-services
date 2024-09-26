@@ -28,6 +28,7 @@ def create_story(db, gql_endpoint, story_id):
     mongo_story_info = {
         '_id': story['id'],
         'url': story['url'],
+        'publisher_id': story['source']['id'] if story['source'] else None, # publisher might be deleted
         'og_title': story['og_title'],
         'og_image': story['og_image'],
         'og_description': story['og_description'],
