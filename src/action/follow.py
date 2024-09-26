@@ -33,15 +33,18 @@ def follow_handler(content, gql_client):
         print("action not exitsts")
         return False
 
-    # update mongo
-    mongo_url = os.environ.get('MONGO_URL', None)
-    env = os.environ.get('ENV', 'dev')
-    if mongo_url and obj=='member':
-        db = connect_db(mongo_url, env)
-        if content['action']=='add_follow':
-            add_follow(db, memberId, targetId)
-        if content['action']=='remove_follow':
-            remove_follow(db, memberId, targetId)  
+    # synchronize mongo
+    try:
+        mongo_url = os.environ.get('MONGO_URL', None)
+        env = os.environ.get('ENV', 'dev')
+        if mongo_url and obj=='member':
+            db = connect_db(mongo_url, env)
+            if content['action']=='add_follow':
+                add_follow(db, memberId, targetId)
+            if content['action']=='remove_follow':
+                remove_follow(db, memberId, targetId)
+    except Exception as e:
+        print(f'mongo modify follow failed: {str(e)}')  
 
     mutation = '''
     mutation{

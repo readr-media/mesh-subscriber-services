@@ -1,6 +1,8 @@
 import datetime
 from gql import gql
 import src.config as config
+from src.mongo import add_read, remove_read, connect_db
+import os
 
 def check_pick_exists(memberId, obj, targetId, gql_client):
     query = '''
@@ -72,6 +74,16 @@ def add_pick_mutatioin(content, gql_client):
     if not(memberId and targetId and obj and state):
         print("no required data for action")
         return False
+    
+    # synchronize mongodb
+    try:
+        mongo_url = os.environ.get('MONGO_URL', None)
+        env = os.environ.get('ENV', 'dev')
+        if obj=='story' and state=='public' and targetId:
+            db = connect_db(mongo_url, env)
+            add_read(db, memberId, targetId)
+    except Exception as e:
+        print(f"mongo add_read failed: {str(e)}")
 
     check_picks = check_pick_exists(memberId, obj, targetId, gql_client)
     if check_picks == []:  # pick not exitsts create new pick
@@ -101,7 +113,6 @@ def add_pick_and_comment_mutation(content, gql_client):
         return False
 
     comment_obj = 'root' if obj == 'comment' else obj
-
     pick_comment = '''
             pick_comment:{
                 create:{
@@ -126,6 +137,16 @@ def rm_pick_mutation(content, gql_client):
     if not(memberId and targetId and obj):
         print("no required data for action")
         return False
+    
+    # synchronize mongodb
+    try:
+        mongo_url = os.environ.get('MONGO_URL', None)
+        env = os.environ.get('ENV', 'dev')
+        if obj=='story' and targetId:
+            db = connect_db(mongo_url, env)
+            remove_read(db, memberId, targetId)
+    except Exception as e:
+        print(f"mongo add_read failed: {str(e)}")
 
     check_picks = check_pick_exists(memberId, obj, targetId, gql_client)
     if check_picks:
