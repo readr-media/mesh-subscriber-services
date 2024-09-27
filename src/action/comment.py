@@ -70,7 +70,7 @@ def rm_comment_mutation(content, gql_client):
         # synchronize mongodb
         try:
             memberId  = result['updateComment']['member']['id']
-            commentId = result['createComment']['id']
+            commentId = result['updateComment']['id']
             mongo_url = os.environ.get('MONGO_URL', None)
             env = os.environ.get('ENV', 'dev')
             if commentId:
