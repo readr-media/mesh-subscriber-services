@@ -2,6 +2,7 @@ import pymongo
 from src.gql import gql_query, gql_single_story
 import os
 import datetime
+from src.tool import get_timestamp
 
 def connect_db(mongo_url: str, env: str='dev'):
     client = pymongo.MongoClient(mongo_url)
@@ -319,4 +320,50 @@ def remove_follow(db, member_id:str, followed_member_id: str):
     updateExisting = result.raw_result.get('updatedExisting', False)
     if updateExisting:
         print(f'mongo_remove_follow: remove member {followed_member_id} follower: {member_id}')
-    return True 
+    return True
+
+def syncMember(db, member):
+    collection = db.members
+    # pre-filtering reads
+    reads = []
+    for read in member['reads']:
+        story = read['story']
+        if story == None:
+            continue
+        # we store createdAt and sid for read
+        reads.append({
+            "ts": get_timestamp(read['createdAt']),  # store read timestamp
+            "sid": story['id']  # store story id to get target story
+        })
+    # pre-filtering comments
+    comments = []
+    for comment in member['comments']:
+        story = comment['story']
+        if story == None:
+            continue
+        # we store createdAt, sid, content for comment
+        comments.append({
+            "ts": get_timestamp(comment['createdAt']), 
+            "sid": story['id'],
+            "content": comment['content']
+        })
+    filter = {
+        "_id": member['id']
+    }
+    update = {
+        "customId": member['customId'],
+        "name": member['name'],
+        "avatar": member['avatar'],
+        "nickname": member['nickname'],
+        "following": [following['id'] for following in member['following']],
+        "follower": [follower['id'] for follower in member['follower']],
+        "story_reads": reads,
+        "story_comments": comments
+    }
+    # find and update
+    result = collection.find_one_and_update(
+        filter,
+        {"$set": update},
+        upsert=True # If the member doesn't exist, create a new one
+    )
+    return result

@@ -53,3 +53,54 @@ query Story{{
     }}
 }}
 '''
+
+### 查詢單一member
+gql_single_member = '''
+query Member{{
+  member(where: {{id: {ID} }}){{
+    id
+    customId
+    name
+    nickname
+    avatar
+    following{{
+      id
+    }}
+    follower{{
+      id
+    }}
+    reads: pick(where: {{
+      objective: {{
+        equals: "story"
+      }},
+      kind: {{
+        equals: "read"
+      }},
+      is_active: {{
+        equals: true
+      }}
+    }}){{
+      createdAt
+      story{{
+        id
+      }}
+    }}
+    comments: comment(
+      where: {{
+        is_active: {{
+          equals: true
+        }},
+        story: {{
+          NOT: {{}}
+        }}
+      }}
+    ){{
+        createdAt
+        content
+        story{{
+            id
+        }}
+    }}
+  }}
+}}
+'''
