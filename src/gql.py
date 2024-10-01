@@ -50,6 +50,7 @@ query Story{{
         og_description
         full_screen_ad
         isMember
+        published_date
     }}
 }}
 '''
