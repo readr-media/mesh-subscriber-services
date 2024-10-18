@@ -1,7 +1,7 @@
 import datetime
 from gql import gql
 import src.config as config
-from src.mongo import add_read, remove_read, connect_db
+from src.mongo import add_read, remove_read, connect_db, add_comment
 import os
 
 def check_pick_exists(memberId, obj, targetId, gql_client):
@@ -41,12 +41,16 @@ def create_pick_mutation(memberId, obj, targetId, state, published_date, pick_co
                     %s
                 }){
                     id,
+                    pick_comment{
+                        id
+                        content
+                    }
                 }
         }''' % (memberId, obj, obj, targetId, state, published_date, pick_comment)
     result = gql_client.execute(gql(mutation))
     if isinstance(result, dict) and 'createPick' in result:
-        return True
-    return False
+        return result['createPick']
+    return None
 
 def update_pick_mutation(update_data, gql_client):
     mutation = '''
@@ -88,7 +92,8 @@ def add_pick_mutatioin(content, gql_client):
     check_picks = check_pick_exists(memberId, obj, targetId, gql_client)
     if check_picks == []:  # pick not exitsts create new pick
         pick_comment = ''
-        return create_pick_mutation(memberId, obj, targetId, state, published_date, pick_comment, gql_client)
+        result = create_pick_mutation(memberId, obj, targetId, state, published_date, pick_comment, gql_client)
+        return True if result else False
     elif check_picks:  # update pick is_active to true
         pickId = check_picks[0]['id']
         update_data = '{where:{id:%s}, data:{is_active:true, state: "%s"}}' % (pickId, state)
@@ -125,14 +130,20 @@ def add_pick_and_comment_mutation(content, gql_client):
             }''' % (memberId, state, published_date, pick_content, comment_obj, targetId)
 
     result = create_pick_mutation(memberId, obj, targetId, state, published_date, pick_comment, gql_client)
-    if result==True:
-        # synchronize mongodb, we only synchronize read
+    if result:
+        # synchronize mongodb, we only synchronize obj=='story'
         try:
             mongo_url = os.environ.get('MONGO_URL', None)
             env = os.environ.get('ENV', 'dev')
             if obj=='story' and state=='public' and targetId:
+                storyId = targetId
                 db = connect_db(mongo_url, env)
-                add_read(db, memberId, targetId)
+                add_read(db, memberId, storyId)
+                pick_comment = result['pick_comment']
+                if pick_comment and isinstance(pick_comment, dict):
+                    commentId = pick_comment['id']
+                    content = pick_comment['content']
+                    add_comment(db, memberId, commentId, storyId, content)
         except Exception as e:
             print(f"mongo add_read failed: {str(e)}")
     return result
