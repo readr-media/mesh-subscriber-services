@@ -140,7 +140,8 @@ def add_pick_and_comment_mutation(content, gql_client):
                 db = connect_db(mongo_url, env)
                 add_read(db, memberId, storyId)
                 pick_comment = result['pick_comment']
-                if pick_comment and isinstance(pick_comment, dict):
+                print("mongo_add_pick_and_comment, pick_comment: ", pick_comment)
+                if pick_comment:
                     commentId = pick_comment['id']
                     content = pick_comment['content']
                     add_comment(db, memberId, commentId, storyId, content)
