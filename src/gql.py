@@ -62,6 +62,7 @@ query Member{{
     id
     customId
     name
+    is_active
     nickname
     avatar
     following{{
@@ -104,4 +105,50 @@ query Member{{
     }}
   }}
 }}
+'''
+
+### For remove member pubsub
+gql_update_member = '''
+mutation updateMember($where: MemberWhereUniqueInput!, $data: MemberUpdateInput!){
+  updateMember(where: $where, data: $data){
+    id
+    is_active
+    pick{
+      id
+    }
+    comment{
+      id
+    }
+    invited{
+      id
+    }
+  }
+}
+'''
+
+gql_update_picks = '''
+mutation updatePicks($data: [PickUpdateArgs!]!){
+    updatePicks(data: $data){
+        id
+        is_active
+    }
+}
+'''
+
+gql_update_comments = '''
+mutation updateComments($data: [CommentUpdateArgs!]!){
+    updateComments(data: $data){
+        id
+        is_active
+    }
+}
+'''
+
+gql_update_invitationCodes = '''
+mutation updateInvitationCodes($data: [InvitationCodeUpdateArgs!]!){
+  updateInvitationCodes(data: $data){
+    id
+    expired
+  }
+}
 '''

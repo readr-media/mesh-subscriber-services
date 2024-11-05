@@ -354,6 +354,7 @@ def syncMember(db, member):
     update = {
         "customId": member['customId'],
         "name": member['name'],
+        "is_active": member['is_active'],
         "avatar": member['avatar'],
         "nickname": member['nickname'],
         "following": [following['id'] for following in member['following']],
@@ -367,4 +368,15 @@ def syncMember(db, member):
         {"$set": update},
         upsert=True # If the member doesn't exist, create a new one
     )
+    return result
+
+def updateMemberActive(db, member_id, state: bool=True):
+    collection = db.members
+    query  = {"_id": member_id}
+    action = {
+        "$set": {
+            "is_active": state
+        }
+    }
+    result = collection.update_many(query, action)
     return result
