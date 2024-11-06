@@ -378,5 +378,5 @@ def updateMemberActive(db, member_id, state: bool=True):
             "is_active": state
         }
     }
-    result = collection.update_many(query, action)
+    result = collection.update_one(query, action)
     return result
