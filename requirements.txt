@@ -9,3 +9,4 @@ google-cloud-logging==2.7.0
 pytz==2023.3.post1
 pymongo==4.8.0
 requests_toolbelt
+meilisearch

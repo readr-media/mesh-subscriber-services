@@ -9,6 +9,7 @@ from src.action.bookmark import bookmark_handler
 from src.action.like import like_handler
 from src.action.category import category_handler
 from src.action.member import member_handler
+from src.action.collection import collection_handler
 
 def execute(content):
     if 'action' in content and content['action']:
@@ -31,6 +32,8 @@ def execute(content):
             return category_handler(content, gql_client)
         if 'member' in action:
             return member_handler(content, gql_client)
-        if 'read' or 'collection' in action:
+        if 'collection' in action:
+            return collection_handler(content)
+        if 'read' in action:
             return True
     return False

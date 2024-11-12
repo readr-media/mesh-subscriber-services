@@ -1,2 +1,3 @@
 TIME_ZONE = "Asia/Taipei"
 CUSTOME_MEMBER = -1
+MEILISEARCH_COLLECTION_INDEX = 'mesh_collection'
