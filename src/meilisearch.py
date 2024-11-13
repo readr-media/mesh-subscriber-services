@@ -1,5 +1,16 @@
 import os
 import meilisearch
+import gql
+from src.config import MEILISEARCH_MEMBER_INDEX
+
+gql_member_search = '''
+query Member{{
+    member(where: {{id: {ID} }}){{
+        id
+        name
+    }}
+}}
+'''
 
 def add_document(index, data):
     '''
@@ -20,4 +31,17 @@ def del_document(index, document_id):
     try:
         client.index(index).delete_document(document_id)
     except Exception as e:
-        print(f'add document failed, reason: {e}') 
+        print(f'add document failed, reason: {e}')
+        
+def add_member(member_id, gql_client):
+    data = gql_client.execute(gql(gql_member_search.format(ID=member_id)))
+    member = data['member']
+    if member:
+        add_document(MEILISEARCH_MEMBER_INDEX, [member])
+        return True
+    print("update member failed to meilisearch")
+    return False
+
+def del_member(member_id):
+    del_document(MEILISEARCH_MEMBER_INDEX, member_id)
+    return True

@@ -2,6 +2,7 @@ from src.mongo import connect_db, syncMember, updateMemberActive
 import os
 from src.gql import gql_single_member, gql_update_member, gql_update_comments, gql_update_invitationCodes, gql_update_picks
 from gql import gql
+import src.meilisearch as meili
 
 def member_handler(content, gql_client):
     action = content['action']
@@ -21,6 +22,7 @@ def member_handler(content, gql_client):
             member = member['member']
             if member:
                 syncMember(db, member)
+                meili.add_member(memberId, gql_client)
         if action == "remove_member":
             state = content.get('state', False)
             result = deactivate_member_actions(gql_client, memberId, state)
@@ -29,6 +31,7 @@ def member_handler(content, gql_client):
             result = updateMemberActive(db, member_id=memberId, state=state)
             if result:
                 print("Deactivate member data in MongoDB successed")
+            meili.del_member(memberId)
     except Exception as e:
         print(str(e))
     return True
