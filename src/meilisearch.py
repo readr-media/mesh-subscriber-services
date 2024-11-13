@@ -1,6 +1,6 @@
 import os
 import meilisearch
-import gql
+from gql import gql
 from src.config import MEILISEARCH_MEMBER_INDEX
 
 gql_member_search = '''
