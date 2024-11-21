@@ -1,233 +1,61 @@
 import os
-import os
-from datetime import datetime
-from gql import gql, Client
+from gql import Client
 from gql.transport.requests import RequestsHTTPTransport
 
-from src.notify.query_collection import collection_follower, collection_creator_follower
-from src.notify.query import creator, picker, commenter
+from src.notify.query import query_rm_comment_data, query_members, remove_same_member_sender, query_delete_notifyIds, update_notifies, delete_notify, create_notify
 import src.config as config
 
-def remove_same_member_sender(members, senderId):
-    members = set(members)
-    members.discard(senderId)
-    return members
+from src.notify.follow import notify_add_follow
+from src.notify.comment import notify_add_comment
+from src.notify.pick import notify_add_pick
+from src.notify.collection import notify_add_collection
+from src.notify.like import notify_add_like
+from src.mongo import connect_db
 
-def query_rm_comment_data(gql_client, commentId, memberId):
-    rm_comment_data = {}
-    query = '''
-    query{
-    comment(where:{id:"%s"}){
-        story{id}
-        collection{id}
-        root{id}
-        }
-    stories(where:{comment:{some:{id:{equals:%s}}}}){ 
-        id
-        comment(where:{id:{not:{equals:"%s"}}, is_active:{equals:true}, member:{id:{equals:"%s"}}}, orderBy:{published_date:desc}, take:1){
-            published_date
-            } 
-        }
-    collections(where:{comment:{some:{id:{equals:%s}}}}){
-        id
-        comment(where:{id:{not:{equals:"%s"}}, is_active:{equals:true}, member:{id:{equals:"%s"}}}, orderBy:{published_date:desc}, take:1){
-            published_date
-            }  
-        }
-    }'''% (commentId, commentId, commentId, memberId, commentId, commentId, memberId)
-    result = gql_client.execute(gql(query))
-    if isinstance(result, dict) and result:
-        if result['comment'] and (result['comment']['story'] or result['comment']['collection']):
-            if result['comment']['story']:
-                rm_comment_data['obj'] = 'story'
-                rm_comment_data['object_id'] = result['comment']['story']['id']
-            elif result['comment']['collection']:
-                rm_comment_data['obj'] = 'collection'
-                rm_comment_data['object_id'] = result['comment']['collection']['id']
-        else:
-            return False
-        if result['stories'] and result['stories'][0]['comment'] and result['stories'][0]['comment']:
-            rm_comment_data['published_date'] = result['stories'][0]['comment'][0]['published_date']
-        elif result['collections'] and result['collections'][0]['comment'] and result['collections'][0]['comment']:
-            rm_comment_data['published_date'] = result['collections'][0]['comment'][0]['published_date']
-        return rm_comment_data
-    else:
+def validate_input(data: dict):
+    action = data.get('action', "None")
+    objective = data.get('objective', "None")
+    if action not in config.VALID_NOTIFY_ACTIONS.keys():
         return False
-
-
-
-def create_notify(gql_client, members, senderId, type_str, obj, objectiveId):
-    now_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
-    mutation_datas = []
-    for memberId in members:
-        mutation_data = '''{
-            member:{
-                connect:{
-                    id:"%s"
-                    }
-                },
-            sender:{
-                connect:{
-                    id:"%s"
-                    }
-                },
-            type:"%s",
-            objective:"%s",
-            object_id:%s,
-            state:"unread",
-            action_date:"%s"
-            }''' % (memberId, senderId, type_str, obj, objectiveId, now_time)
-        mutation_datas.append(mutation_data)
-    mutation_datas = ','.join(mutation_datas)
-    mutation = '''
-    mutation{
-        createNotifies(data:[%s]){
-            id
-            member{
-                id
-            }
-            sender{
-                id
-            }
-            type
-            state
-            action_date
-        }
-    }''' % mutation_datas
-    result = gql_client.execute(gql(mutation))
-    if isinstance(result, dict) and 'createNotifies' in result:
-        if isinstance(result['createNotifies'], list) and result['createNotifies']:
-            return True
-    return False
-
-def delete_notify(gql_client, notifyId: int=None):
-    if notifyId:
-        delete_mutation = '''
-        mutation{
-            deleteNotify(where:{id:"%s"}){
-                id
-            }
-        }''' % notifyId
-        result = gql_client.execute(gql(delete_mutation))
-        if isinstance(result, dict) and 'deleteNotify' in result:
-            if isinstance(result['deleteNotify'], dict) and result['deleteNotify']:
-                return True
-    return False
-
-def update_notifies(gql_client, notifyIds, actiondate):
-    mutation_datas = []
-    for notifyId in notifyIds:
-        mutation_data = '''{where:{id:"%s"}data:{action_date:"%s"}}''' % (notifyId, actiondate)
-        mutation_datas.append(mutation_data)
-    mutation_datas = ','.join(mutation_datas)
-    mutation = '''mutation{
-        updateNotifies(data:[%s]){
-            id
-            action_date
-        }
-    }'''% mutation_datas
-    result = gql_client.execute(gql(mutation))
-    if isinstance(result, dict) and 'updateNotifies' in result:
-        if isinstance(result['updateNotifies'], list) and result['updateNotifies']:
-            return True
-    return False
-
-
-def query_members(gql_client, senderId, type_str, obj, object_id):
-    if type_str == 'follow':
-        if obj == 'member':
-            return [object_id]
-        elif obj == 'collection':
-            return creator(gql_client, 'collection', 'creator', object_id)
-        elif obj == 'publisher':
-            return []
-        else:
-            print("follow objective not exists.")
-
-    elif type_str == 'comment':
-        # delete same notify before create
-        notifiesId = query_delete_notifyIds(gql_client, senderId, type_str, obj, object_id)
-        if len(notifiesId)==0:
-            return False
-        for notifyId in notifiesId:
-            if delete_notify(gql_client, notifyId):
-                continue
-        if obj == 'story':
-            story_pickers = picker(gql_client, 'story', object_id)
-            story_comment_members = commenter(gql_client, 'story', object_id)
-            # story_picker and story_comment_member could be empty list
-            return story_pickers + story_comment_members if isinstance(story_pickers, list) and isinstance(story_comment_members, list) else False
-
-        elif obj == 'comment':
-            comment_creators = creator(gql_client, 'comment', 'member', object_id)
-            comment_pickers = picker(gql_client, 'comment', object_id)
-            comment_members = commenter(gql_client, 'root', object_id)
-            return comment_creators + comment_pickers + comment_members if comment_creators and isinstance(comment_pickers, list) and isinstance(comment_members, list) else False
-        elif obj == 'collection':
-            collection_creators = creator(gql_client, 'collection', 'creator', object_id)
-            collection_pickers = picker(gql_client, 'collection', object_id)
-            collection_comment_members = commenter(gql_client, list_name='collection', targetId=object_id)
-            return collection_creators + collection_pickers + collection_comment_members if collection_creators and isinstance(collection_pickers, list) and isinstance(collection_comment_members, list) else False
-
-        else:
-            print('comment objective not exists')
-
-    elif type_str == 'pick':
-        if obj == 'comment':
-            return creator(gql_client, 'comment', 'member', object_id)
-        elif obj == 'collection':
-            collection_creators = creator(gql_client, 'collection', 'creator', object_id)
-            collection_followers = collection_follower(object_id, gql_client)
-            # collection__creator must exists or this is a query error # collection_follower could be a empty list
-            return collection_creators + collection_followers if collection_creators and isinstance(collection_followers, list) else False
-        elif obj == 'story':
-            return []
-        else:
-            print("pick objective not exists.")
-    elif type_str == 'heart':
-        return creator(gql_client, 'comment', 'member', object_id)
-    elif type_str == 'create_collection':
-        return collection_creator_follower(senderId, gql_client)
-    elif type_str == 'pickandcomment':
-        if obj == 'story':
-            story_pickers = picker(gql_client, 'story', object_id)
-            story_comment_members = commenter(gql_client, 'story', object_id)
-            # story_picker and story_comment_member could be empty list
-            return story_pickers + story_comment_members if isinstance(story_pickers, list) and isinstance(story_comment_members, list) else False
-
-        elif obj == 'comment':
-            comment_creators = creator(gql_client, 'comment', 'member', object_id)
-            comment_pickers = picker(gql_client, 'comment', object_id)
-            comment_members = commenter(gql_client, 'root', object_id)
-            return comment_creators + comment_pickers + comment_members if comment_creators and isinstance(comment_pickers, list) and isinstance(comment_members, list) else False
-        elif obj == 'collection':
-            collection_creators = creator(gql_client, 'collection', 'creator', object_id)
-            collection_pickers = picker(gql_client, 'collection', object_id)
-            collection_comment_members = commenter(gql_client, list_name='collection', targetId=object_id)
-            collection_followers = collection_follower(object_id, gql_client)
-            return collection_creators + collection_pickers + collection_comment_members +collection_followers if collection_creators and isinstance(collection_pickers, list) and isinstance(collection_comment_members, list) and isinstance(collection_followers, list) else False
-        else:
-            print('pickandcomment objective not exists')
-    else:
-        print("action type not exists.")
+    valid_objs = config.VALID_NOTIFY_ACTIONS[action]
+    if objective not in valid_objs:
         return False
+    return True
 
-def query_delete_notifyIds(gql_client, senderId, type_str, obj, object_id):
-    query_notifiesId = '''
-    query{
-        notifies(where:{sender:{id:{equals:"%s"}}, type:{equals:"%s"}, objective:{equals:"%s"}, object_id:{equals:%s}}){
-            id
-        }
-    }''' % (senderId, type_str, obj, object_id)
-    result = gql_client.execute(gql(query_notifiesId))
-    if isinstance(result, dict) and 'notifies' in result:
-        if isinstance(result['notifies'], list):
-            if result['notifies']:
-                return [notifies['id']for notifies in result['notifies']]
-            return []
-    return []
+def execute_mongo(content):
+    # check input
+    if validate_input(content)==False:
+        return False
+    action = content.get('action', None)
+    
+    # connect mongodb
+    mongo_url = os.environ.get('MONGO_URL', None)
+    env = os.environ.get('ENV', 'dev')
+    db = connect_db(mongo_url, env)
+    
+    # assing tasks
+    result = True
+    if action=="add_follow":
+        result = notify_add_follow(db, content)
+    if action=="add_comment":
+        result = notify_add_comment(db, content)
+    if action=="add_pick_and_comment":
+        ### notification of add_pick_and_comment is equals to add_comment
+        content['action'] = 'add_comment'
+        result = notify_add_comment(db, content)
+    if action=="add_pick":
+        result = notify_add_pick(db, content)
+    if action=="add_like":
+        result = notify_add_like(db, content)
+    if action=="add_collection":
+        result = notify_add_collection(db, content)
+    return result
 
-def execute(content):
+
+def execute_cms(content):
+    '''
+        Execute notification processing and write into CMS
+    '''
     gql_endpoint = os.environ['GQL_ENDPOINT']
     gql_transport = RequestsHTTPTransport(url=gql_endpoint)
     gql_client = Client(transport=gql_transport, fetch_schema_from_transport=True)
