@@ -34,7 +34,9 @@ def notify_add_collection(db, data):
 
     # get recipients
     recipients = []
-    member = gql_query(config.MESH_GQL_ENDPOINT, gql_member_followers.format(ID=memberId))
+    member, error_msg = gql_query(config.MESH_GQL_ENDPOINT, gql_member_followers.format(ID=memberId))
+    if error_msg:
+        return False
     followers = member['member']['follower']
     for follower in followers:
         is_active = follower['is_active']
