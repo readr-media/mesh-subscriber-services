@@ -25,7 +25,7 @@ def notify_add_like(db, data, aggregate: bool=True):
     new_notify = {
         "uuid": gen_uuid(),
         "read": False,
-        "action": "add_pick",
+        "action": "add_like",
         "objective": "comment", # add_pick's objective is "comment" only
         "targetId": commentId,
         "aggregate": aggregate,
