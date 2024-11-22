@@ -11,6 +11,7 @@ from src.notify.pick import notify_add_pick
 from src.notify.collection import notify_add_collection
 from src.notify.like import notify_add_like
 from src.mongo import connect_db
+from src.tool import get_current_timestamp
 
 def validate_input(data: dict):
     action = data.get('action', "None")
@@ -20,6 +21,34 @@ def validate_input(data: dict):
     valid_objs = config.VALID_NOTIFY_ACTIONS[action]
     if objective not in valid_objs:
         return False
+    return True
+
+def read_notify(db, content):
+    memberId = content.get('memberId', config.INVALID_ID)
+    if memberId==config.INVALID_ID:
+        return False
+    db.notifications.update_one(
+        {"_id": memberId}, 
+        {"$set": {"lrt": get_current_timestamp()}}
+    )
+    return True
+
+def click_notify(db, content):
+    memberId = content.get('memberId', config.INVALID_ID)
+    uuid = content.get('uuid', None)
+    if memberId==config.INVALID_ID or uuid==None:
+        return False
+    db.notifications.update_one(
+        {
+            "_id": memberId,
+            "notifies.uuid": uuid,
+        },
+        {
+            "$set": {
+                "notifies.$.read": True  # Using $ operator to match uuid
+            }
+        }
+    )
     return True
 
 def execute_mongo(content):
@@ -49,6 +78,10 @@ def execute_mongo(content):
         result = notify_add_like(db, content)
     if action=="add_collection":
         result = notify_add_collection(db, content)
+    if action=="read_notify":
+        result = read_notify(db, content)
+    if action=="click_notify":
+        result = click_notify(db, content)
     return result
 
 
