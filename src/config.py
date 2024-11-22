@@ -18,5 +18,7 @@ VALID_NOTIFY_ACTIONS = {
     "add_pick": ["collection"],
     "add_like": ["None"],
     "add_pick_and_comment": ["story", "collection"],
-    "add_collection": ["None"]
+    "add_collection": ["None"],
+    "read_notify": ["None"],
+    "click_notify": ["None"],
 }
