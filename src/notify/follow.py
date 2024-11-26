@@ -32,7 +32,7 @@ def notify_add_follow(db, data):
     else:
         new_notifies = record['notifies']
         new_notifies.insert(0, new_record)
-        new_notifies[:config.MOST_NOTIFY_RECORDS]
+        new_notifies = new_notifies[:config.MOST_NOTIFY_RECORDS]
         col_records.update_one(
             {"_id": targetId},
             {"$set": {"notifies": new_notifies}}

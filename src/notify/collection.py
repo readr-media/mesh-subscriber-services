@@ -59,7 +59,7 @@ def notify_add_collection(db, data):
         else:
             new_notifies = notifier['notifies']
             new_notifies.insert(0, new_notify)
-            new_notifies[:config.MOST_NOTIFY_RECORDS]
+            new_notifies = new_notifies[:config.MOST_NOTIFY_RECORDS]
             col_notifies.update_one(
                 {"_id": recipientId},
                 {"$set": {"notifies": new_notifies}}
