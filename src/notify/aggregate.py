@@ -37,6 +37,10 @@ def aggregate_notify(db, notifierId: str, recipientId: str, new_notify: dict):
         target_notify['read'] = False
         target_notify['from'].insert(0, notifierId)
         target_notify['ts'] = get_current_timestamp()
+        
+        content = new_notify.get('content', None)
+        if content:
+            target_notify['content'] = content
 
         new_notifies = [target_notify] + all_notifies[:target_idx] + all_notifies[target_idx+1:]
         new_notifies = new_notifies[:config.MOST_NOTIFY_RECORDS]

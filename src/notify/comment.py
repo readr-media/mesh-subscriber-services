@@ -2,6 +2,7 @@ import src.config as config
 from src.tool import get_current_timestamp, gen_uuid
 from src.gql import gql_query
 from src.notify.aggregate import aggregate_notify
+from src.notify.content import get_objective_content
 
 gql_story_comment = '''
 query Story{{
@@ -86,6 +87,9 @@ def notify_add_comment(db, data):
             "from": [memberId],
             "ts": get_current_timestamp(),
         }
+        content = get_objective_content("story", storyId)
+        if content:
+            new_notify['content'] = content
         for recipientId in recipients:
             print(f"add_comment_story: notify recipientId {recipientId}")
             aggregate_notify(db, memberId, recipientId, new_notify)
@@ -123,6 +127,10 @@ def notify_add_comment(db, data):
             "from": [memberId],
             "ts": get_current_timestamp(),
         }
+        content = get_objective_content("collection", collectionId)
+        if content:
+            new_notify['content'] = content
+        
         for recipientId in recipients:
             print(f"add_comment_collection: notify recipientId {recipientId}")
             aggregate_notify(db, memberId, recipientId, new_notify)
@@ -148,6 +156,9 @@ def notify_add_comment(db, data):
                 "from": [memberId],
                 "ts": get_current_timestamp()
             }
+            content = get_objective_content("comment", commentId)
+            if content:
+                new_notify['content'] = content
             print(f"add_comment_comment: notify recipientId {recipientId}")
             aggregate_notify(db, memberId, recipientId, new_notify)
     return True

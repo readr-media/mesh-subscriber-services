@@ -2,6 +2,7 @@ import src.config as config
 from src.tool import get_current_timestamp, gen_uuid
 from src.gql import gql_query
 from src.notify.aggregate import aggregate_notify
+from src.notify.content import get_objective_content
 
 gql_collection_pick = '''
 query Collection{{
@@ -33,6 +34,9 @@ def notify_add_pick(db, data, aggregate: bool=True):
         "from": [memberId],
         "ts": get_current_timestamp()
     }
+    content = get_objective_content(objective, targetId)
+    if content:
+        new_notify['content'] = content
 
     if objective=="collection":
         collection, error_msg = gql_query(config.MESH_GQL_ENDPOINT, gql_collection_pick.format(ID=targetId))

@@ -2,6 +2,7 @@ import src.config as config
 from src.tool import get_current_timestamp, gen_uuid
 from src.gql import gql_query
 from src.notify.aggregate import aggregate_notify
+from src.notify.content import get_objective_content
 
 gql_comment_creator = '''
 query Comment{{
@@ -32,6 +33,9 @@ def notify_add_like(db, data, aggregate: bool=True):
         "from": [memberId],
         "ts": get_current_timestamp()
     }
+    content = get_objective_content("comment", commentId)
+    if content:
+        new_notify['content'] = content
 
     comment, error_msg = gql_query(config.MESH_GQL_ENDPOINT, gql_comment_creator.format(ID=commentId))
     if error_msg:

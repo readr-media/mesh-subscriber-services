@@ -1,6 +1,7 @@
 import src.config as config
 from src.tool import get_current_timestamp, gen_uuid
 from src.gql import gql_query
+from src.notify.content import get_objective_content
 
 gql_member_followers = '''
 query Member{{
@@ -31,6 +32,9 @@ def notify_add_collection(db, data):
         "from": memberId,
         "ts": get_current_timestamp()
     }
+    content = get_objective_content("collection", collectionId)
+    if content:
+        new_notify['content'] = content
 
     # get recipients
     recipients = []
