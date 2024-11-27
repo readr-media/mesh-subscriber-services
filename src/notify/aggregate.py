@@ -27,9 +27,9 @@ def aggregate_notify(db, notifierId: str, recipientId: str, new_notify: dict):
     for idx, notify in enumerate(all_notifies):
         action    = notify['action']
         objective = notify.get('objective', None)
-        targetId  = notify['targetId']
-        aggregate = notify['aggregate']
-        if new_notify['action']==action and new_notify['targetId']==targetId and new_notify.get('objective', None)==objective:
+        targetId  = notify.get('targetId', None)
+        aggregate = notify.get('aggregate', False)
+        if new_notify['action']==action and new_notify['targetId']==targetId and new_notify.get('objective', None)==objective and aggregate==True:
                 target_idx = idx
                 break
     if target_idx!=NO_TARGET_IDX:
