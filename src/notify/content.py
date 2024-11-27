@@ -51,15 +51,15 @@ def get_objective_content(objective, targetId):
     try:
         if objective=="story":
             gql_string = gql_notify_story.format(ID=targetId)
-            data = gql_query(MESH_GQL_ENDPOINT, gql_string)
+            data, _ = gql_query(MESH_GQL_ENDPOINT, gql_string)
             content = data['story']
         if objective=="comment":
             gql_string = gql_notify_comment.format(ID=targetId)
-            data = gql_query(MESH_GQL_ENDPOINT, gql_string)
+            data, _ = gql_query(MESH_GQL_ENDPOINT, gql_string)
             content = data['comment']        
         if objective=="collection":
             gql_string = gql_notify_collection.format(ID=targetId)
-            data = gql_query(MESH_GQL_ENDPOINT, gql_string)
+            data, _ = gql_query(MESH_GQL_ENDPOINT, gql_string)
             content = data['collection']
     except:
         print(f"get_objective_content error: cannot find {objective} {targetId}")
