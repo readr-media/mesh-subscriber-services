@@ -11,6 +11,9 @@ query Comment{{
         id
         is_active
     }}
+    story{{
+        id
+    }}
   }}
 }}
 '''
