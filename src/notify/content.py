@@ -33,6 +33,9 @@ query Comment{{
   comment(where: {{id: {ID} }}){{
     id
     content
+    story{{
+        id
+    }}
   }}
 }}
 '''
