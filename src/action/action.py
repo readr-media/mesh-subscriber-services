@@ -10,6 +10,7 @@ from src.action.like import like_handler
 from src.action.category import category_handler
 from src.action.member import member_handler
 from src.action.collection import collection_handler
+from src.action.report import report_handler
 
 def execute(content):
     if 'action' in content and content['action']:
@@ -36,4 +37,6 @@ def execute(content):
             return collection_handler(content)
         if 'read' in action:
             return True
+        if 'report' in action:
+            return report_handler(content, gql_client)
     return False
