@@ -12,27 +12,27 @@ def report_handler(content, gql_client):
         print("no required data for action")
         return False
 
-    comment = content['comment']
     report_gql = None
-    if comment:
+    if obj == 'comment':
         report_gql = gql_comment_member
     else:
         report_gql = gql_collection_member
     gql_endpoint = os.environ['GQL_ENDPOINT']
     respondentId, _ = gql_query(gql_endpoint, report_gql.format(ID=targetId))
     
-    if comment:
+    if obj == 'comment':
         respondentId = respondentId['comment']['member']['id']
     else:
         respondentId = respondentId['collection']['creator']['id']
-    if content['action'] == 'add_report_record':
+    action = content['action']
+    if action == 'add_report_record':
         try:
             fields = [
                 f"informant:{{connect:{{id:{memberId}}}}}",
                 f"reason:{{connect:{{id:{reasonId}}}}}",
                 f"respondent:{{connect:{{id:{respondentId}}}}}",
             ]
-            if comment:
+            if obj == 'comment':
                 fields.append(f"comment:{{connect:{{id:{targetId}}}}}")
             else:
                 fields.append(f"collection:{{connect:{{id:{targetId}}}}}")
