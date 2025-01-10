@@ -13,17 +13,17 @@ def report_handler(content, gql_client):
         return False
 
     report_gql = None
+    gql_endpoint = os.environ['GQL_ENDPOINT']
+    respondentId = None
     if obj == 'comment':
         report_gql = gql_comment_member
-    else:
-        report_gql = gql_collection_member
-    gql_endpoint = os.environ['GQL_ENDPOINT']
-    respondentId, _ = gql_query(gql_endpoint, report_gql.format(ID=targetId))
-    
-    if obj == 'comment':
+        respondentId, _ = gql_query(gql_endpoint, report_gql.format(ID=targetId))
         respondentId = respondentId['comment']['member']['id']
     else:
+        report_gql = gql_collection_member
+        respondentId, _ = gql_query(gql_endpoint, report_gql.format(ID=targetId))
         respondentId = respondentId['collection']['creator']['id']
+    
     action = content['action']
     if action == 'add_report_record':
         try:
