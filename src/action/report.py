@@ -16,6 +16,7 @@ def report_handler(content, gql_client):
     gql_endpoint = os.environ['GQL_ENDPOINT']
     respondentId = None
     if obj == 'comment':
+        print("obj = comment")
         report_gql = gql_comment_member
         respondentId, _ = gql_query(gql_endpoint, report_gql.format(ID=targetId))
         respondentId = respondentId['comment']['member']['id']
@@ -26,6 +27,7 @@ def report_handler(content, gql_client):
     
     action = content['action']
     if action == 'add_report_record':
+        print("enter add_report_record")
         try:
             fields = [
                 f"informant:{{connect:{{id:{memberId}}}}}",
@@ -50,6 +52,7 @@ def report_handler(content, gql_client):
                 }}
             '''
             result = gql_client.execute(gql(mutation))
+            print(result)
             return True if isinstance(result, dict) and 'createReportRecord' in result else False
         except Exception as e:
             print(f"add_report failed: {str(e)}")
