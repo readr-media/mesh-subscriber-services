@@ -152,3 +152,28 @@ mutation updateInvitationCodes($data: [InvitationCodeUpdateArgs!]!){
   }
 }
 '''
+
+### 查詢該集錦屬於哪個用戶
+gql_collection_member = '''
+query Collection{{
+    collection(where: {{id: {ID} }}){{
+        creator {{
+            id
+            name
+        }}
+    }}
+}}
+'''
+
+### 查詢該留言屬於哪個用戶
+gql_comment_member = '''
+query Comment{{
+    comment(where: {{id: {ID} }}){{
+        member {{
+            id
+            name
+        }}
+        content
+    }}
+}}
+'''
