@@ -8,7 +8,7 @@ def report_handler(content, gql_client):
     targetId = content['targetId'] if 'targetId' in content and content['targetId'] else False
     obj = content['objective'] if 'objective' in content and content['objective'] else False
     reasonId = content['reasonId'] if 'reasonId' in content and content['reasonId'] else False
-    if not (memberId or targetId or obj or reasonId) or 'comment' not in content:
+    if not memberId or not targetId or not obj or not reasonId:
         print("no required data for action")
         return False
 
