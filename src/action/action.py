@@ -14,7 +14,6 @@ from src.action.report import report_handler
 
 def execute(content):
     if 'action' in content and content['action']:
-        print("excution")
         action = content['action']
         gql_endpoint = os.environ['GQL_ENDPOINT']
         gql_transport = RequestsHTTPTransport(url=gql_endpoint)
@@ -39,6 +38,5 @@ def execute(content):
         if 'read' in action:
             return True
         if 'report' in action:
-            print("excution report")
             return report_handler(content, gql_client)
     return False

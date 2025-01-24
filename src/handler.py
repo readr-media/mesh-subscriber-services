@@ -23,7 +23,6 @@ def action_handler(request: SubRequest) -> JSONResponse:
     content = ast.literal_eval(content)
     print("action_handler content: ", content)
     if action.execute(content)==False:
-        print("fail action")
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={"message": "action doesn't belong to this handler"},
