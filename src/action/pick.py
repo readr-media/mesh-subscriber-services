@@ -111,7 +111,7 @@ def add_pick_and_comment_mutation(content, gql_client):
     obj = content['objective'] if 'objective' in content and content['objective'] else False
     state = content['state'] if 'state' in content and content['state'] else False
     pick_content = content['content'].replace("\n", "\\n") if 'content' in content and content['content'] else False
-    published_date = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    published_date = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 
     if not(memberId and targetId and state and pick_content and obj):
         print("no required data for action")

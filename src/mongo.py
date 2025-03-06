@@ -36,6 +36,7 @@ def create_story(db, gql_endpoint, story_id):
         'full_screen_ad': story['full_screen_ad'],
         'isMember': story['isMember'],
         'published_date': story['published_date'],
+        'story_type': story['story_type'],
         # following fields are user action, we only store member_id which pick is active
         'reads': [],        # member_id list
         'comments': [],

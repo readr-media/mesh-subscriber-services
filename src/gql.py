@@ -51,6 +51,7 @@ query Story{{
         full_screen_ad
         isMember
         published_date
+        story_type
     }}
 }}
 '''

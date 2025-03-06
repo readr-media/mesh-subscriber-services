@@ -14,7 +14,7 @@ def add_comment_mutation(content, gql_client):
     comment_content = content.get('content', False)
     comment_content = str(comment_content).replace("\n", "\\n") if comment_content else False
     obj = content.get('objective', False)
-    published_date = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    published_date = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 
     if not(memberId and targetId and state and comment_content and obj):
         print("no required data for action")
